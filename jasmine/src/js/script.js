@@ -3,80 +3,54 @@ var request2 = new XMLHttpRequest();
 var user = "citlas"
 
 
-function showError(){
-    //error
-    const errorDiv = document.getElementById('error');
-    const error = document.createElement('p');
-    error.textContent = "Does not exist";
-    error.setAttribute('class','error');
-    errorDiv.appendChild(error);
+
+
+function searchThis(){
+    document.getElementById('avatar').innerHTML = "";
+    document.getElementById('nameInfo').innerHTML = "";
+    document.getElementById('repos').innerHTML = "";
+    document.getElementById('error').innerHTML = "";
+  
+    getSearchedElement();
 }
 
 
-function showRepos(searching){
+function getSearchedElement(){
+    //Get the searched element
+    var searching = document.getElementById("searchedText").value;
+    //console.log(searching)
+    callApi(searching);
+    return searching; 
+}
 
-        //calling to get their repos
-        request2.open('GET', `https://api.github.com/users/${searching}/repos`, true);
-        request2.onload = function(){
-            
-            var data = JSON.parse(this.response);
-            //console.log(data)
+function callApi(searching){
+    //Call the api for user searched
+    request.open('GET', `https://api.github.com/users/${searching}`, true);
+    request.onload = function(){
+    var data = JSON.parse(this.response);
 
-            const repos = document.getElementById('repos');
-            
-            repos.setAttribute('class','showAnswer');
+    //console.log(data)
 
-            const headerRepos = document.createElement('h2');
-            headerRepos.textContent = 'Repositories';
-            headerRepos.setAttribute('class','headerRepos');
-            repos.appendChild(headerRepos);
+    showResults(data,searching);  
+    }
+    request.send();  
+}
+
+function showResults(data,searching){
+
+    //Show results if success
+    if(request.status >= 200 && request.status < 400){
+        showUserInfo(data);
         
+        showRepos(searching);
+        
+        request2.send();
+         
             
-            //getting all repos
-            //console.log(data[0])
-            for(var i=0;i<data.length;i++){                
+        } else {
 
-                //Create div
-                const eachRepo = document.createElement('div');
-                eachRepo.setAttribute('class','eachRepo');
-                repos.appendChild(eachRepo);
-
-                //repo Name
-                const repoName = document.createElement('p');
-                repoName.textContent = data[i].name;
-                repoName.setAttribute('class','repo-name');
-                eachRepo.appendChild(repoName);
-
-                //Create div for stars and forked counters
-                const repoCounts = document.createElement('div');
-                repoCounts.setAttribute('class','repoCounts');
-                eachRepo.appendChild(repoCounts);
-
-                const stars = document.createElement('img');
-                stars.src = 'img/star.svg';
-                stars.setAttribute('class','stars');
-                repoCounts.appendChild(stars);
-
-                const starsCount = document.createElement('p');
-                starsCount.textContent = data[i].stargazers_count;
-                starsCount.setAttribute('class','starsCount');
-                repoCounts.appendChild(starsCount);
-
-                const forks = document.createElement('img');
-                forks.src = 'img/repo-forked.svg';
-                forks.setAttribute('class','forks');
-                repoCounts.appendChild(forks);
-
-                const forksCount = document.createElement('p');
-                forksCount.textContent = data[i].forks_count;
-                forksCount.setAttribute('class','forksCount');
-                repoCounts.appendChild(forksCount);
-
-            }
-            
-
-        }
-
+          showError()
+    }
 }
 
 
@@ -109,50 +83,85 @@ function showUserInfo(data){
     bio.textContent = data.bio;
     bio.setAttribute('class','bio');
     nameInfo.appendChild(bio);
+    
+    return username.textContent;
 }
 
-function showResults(data,searching){
+function showRepos(searching){
 
-    //Show results if success
-    if(request.status >= 200 && request.status < 400){
-        showUserInfo(data);
+    //calling to get their repos
+    request2.open('GET', `https://api.github.com/users/${searching}/repos`, true);
+    request2.onload = function(){
         
-        showRepos(searching);
+        var data = JSON.parse(this.response);
+        console.log(data)
+
+        const repos = document.getElementById('repos');
         
-        request2.send();
-         
-            
-        } else {
+        repos.setAttribute('class','showAnswer');
 
-          showError()
+        const headerRepos = document.createElement('h2');
+        headerRepos.textContent = 'Repositories';
+        headerRepos.setAttribute('class','headerRepos');
+        repos.appendChild(headerRepos);
+    
+        
+        //getting all repos
+        //console.log(data[0])
+        for(var i=0;i<data.length;i++){                
+
+            //Create div
+            const eachRepo = document.createElement('div');
+            eachRepo.setAttribute('class','eachRepo');
+            repos.appendChild(eachRepo);
+
+            //repo Name
+            const repoName = document.createElement('p');
+            repoName.textContent = data[i].name;
+            repoName.setAttribute('class','repo-name');
+            eachRepo.appendChild(repoName);
+
+            //Create div for stars and forked counters
+            const repoCounts = document.createElement('div');
+            repoCounts.setAttribute('class','repoCounts');
+            eachRepo.appendChild(repoCounts);
+
+            const stars = document.createElement('img');
+            stars.src = 'img/star.svg';
+            stars.setAttribute('class','stars');
+            repoCounts.appendChild(stars);
+
+            const starsCount = document.createElement('p');
+            starsCount.textContent = data[i].stargazers_count;
+            starsCount.setAttribute('class','starsCount');
+            repoCounts.appendChild(starsCount);
+
+            const forks = document.createElement('img');
+            forks.src = 'img/repo-forked.svg';
+            forks.setAttribute('class','forks');
+            repoCounts.appendChild(forks);
+
+            const forksCount = document.createElement('p');
+            forksCount.textContent = data[i].forks_count;
+            forksCount.setAttribute('class','forksCount');
+            repoCounts.appendChild(forksCount);
+
+        }
+        
+
     }
+
 }
 
-function callApi(searching){
-    //Call the api for user searched
-    request.open('GET', `https://api.github.com/users/${searching}`, true);
-    request.onload = function(){
-    var data = JSON.parse(this.response);
-
-    //console.log(data)
-
-    showResults(data,searching);    
-    }
-    request.send();
+function showError(){
+    //error
+    const errorDiv = document.getElementById('error');
+    const error = document.createElement('p');
+    error.textContent = "Does not exist";
+    error.setAttribute('class','error');
+    errorDiv.appendChild(error);
+    return error.textContent;
 }
 
-function getSearchedElement(){
-    //Get the searched element
-    var searching = document.getElementById("searchedText").value;
-    //console.log(searching)
-    callApi(searching);
-}
 
-function searchThis(){
-    document.getElementById('avatar').innerHTML = "";
-    document.getElementById('nameInfo').innerHTML = "";
-    document.getElementById('repos').innerHTML = "";
-    document.getElementById('error').innerHTML = "";
-  
-    getSearchedElement();
-}
+
